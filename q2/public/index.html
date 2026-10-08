@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Order Management System</title>
+
+    <style>
+
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            margin: 5px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+
+        th {
+            background: #ddd;
+        }
+
+        #message {
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Online Shopping Order Management</h2>
+
+    <!-- DISPLAY -->
+
+    <button onclick="displayOrders()">
+        Display All Orders
+    </button>
+
+
+    <!-- UPDATE -->
+
+    <h3>Update Order Status</h3>
+
+    <input
+        type="text"
+        id="orderId"
+        placeholder="Enter Order ID"
+    >
+
+    <select id="status">
+
+        <option value="Pending">Pending</option>
+
+        <option value="Processing">Processing</option>
+
+        <option value="Shipped">Shipped</option>
+
+        <option value="Delivered">Delivered</option>
+
+        <option value="Cancelled">Cancelled</option>
+
+    </select>
+
+    <button onclick="updateStatus()">
+        Update Status
+    </button>
+
+    <p id="message"></p>
+
+
+    <!-- ORDER DETAILS -->
+
+    <h3>Order Details</h3>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Order ID</th>
+                <th>Customer Name</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Order Status</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="orderTable">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<script>
+
+async function displayOrders() {
+
+    const response = await fetch("/orders");
+
+    const orders = await response.json();
+
+    let table = "";
+
+    orders.forEach(order => {
+
+        table += `
+            <tr>
+                <td>${order.orderId}</td>
+                <td>${order.customerName}</td>
+                <td>${order.productName}</td>
+                <td>${order.quantity}</td>
+                <td>${order.price}</td>
+                <td>${order.orderStatus}</td>
+            </tr>
+        `;
+
+    });
+
+    document.getElementById("orderTable").innerHTML = table;
+}
+
+
+async function updateStatus() {
+
+    const orderId =
+        document.getElementById("orderId").value;
+
+    const status =
+        document.getElementById("status").value;
+
+
+    if (orderId === "") {
+
+        document.getElementById("message").innerHTML =
+            "Please enter Order ID";
+
+        return;
+    }
+
+
+    const response = await fetch(
+        "/orders/" + orderId,
+        {
+            method: "PUT",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                orderStatus: status
+            })
+        }
+    );
+
+
+    const data = await response.json();
+
+
+    if (response.ok) {
+
+        document.getElementById("message").innerHTML =
+            "Order status updated successfully";
+
+        // Display updated details
+        displayOrders();
+
+    } else {
+
+        document.getElementById("message").innerHTML =
+            data.message;
+    }
+
+}
+
+</script>
+
+</body>
+</html>
